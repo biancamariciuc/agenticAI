@@ -24,14 +24,23 @@ FORMAT = "Answer: <yes|no>, <difference in EUR>"
 # The short prompt: same output line, no room to work.
 SHORT = TRIP + f"\nReply with exactly one line and nothing else: {FORMAT}"
 
-# TODO: write a better prompt for the SAME question. Two changes only:
+# : write a better prompt for the SAME question. Two changes only:
 #   1. give the model room to work before it answers;
 #   2. keep the same last line, so your code can parse it: {FORMAT}
-BETTER = TRIP + "\nTODO"
+BETTER = TRIP + (
+    "\nWork through each cost step by step"
+    " (flights, hotel, city tax, museum passes),"
+    " show the arithmetic, then add them up and compare to the budget."
+    f"\nAfter your reasoning, end with exactly one final line in this format: {FORMAT}"
+)
 
 # BONUS 2 TODO: a prompt where the model does NOT calculate. It writes ONE arithmetic expression for the
 # total cost and ends with the line "Total: <expression>"; evaluate() below does the arithmetic.
-EXPRESSION_ONLY = TRIP + "\nTODO"
+EXPRESSION_ONLY = TRIP + (
+    "\nDo NOT do any arithmetic yourself. Instead, write a single arithmetic expression"
+    " for the total cost using only numbers and + - * / and parentheses."
+    "\nEnd with exactly one line in this format: Total: <expression>"
+)
 
 ANSWER_RE = re.compile(r"Answer:\s*(yes|no)\s*,\s*(?:EUR|€)?\s*([\d.,]+)", re.I)
 
@@ -99,5 +108,9 @@ if __name__ == "__main__":
         print(f"\n== {name}: {correct}/{len(rows)} correct, {tokens:.0f} output tokens on average")
         for p, t, last in rows:
             print(f"   {str(p):<22} {t:>5} tok   last line: {last}")
-        # BONUS 1 TODO: five answers to the same question - which one do you trust?
+        # BONUS 1: five answers to the same question - which one do you trust?
         # Count the parsed answers (collections.Counter) and print the most common one.
+        votes = Counter(p for p, _, _ in rows if p is not None)
+        if votes:
+            winner, count = votes.most_common(1)[0]
+            print(f"   vote: {winner} wins with {count}/{len(rows)}   (all votes: {dict(votes)})")

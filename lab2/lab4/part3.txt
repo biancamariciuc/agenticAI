@@ -1,0 +1,15 @@
+1. Compare the brief with Ana’s hidden profile (PERSONA).
+What did the interviewer never find out? Would that ruin her trip?
+ - Date: it recordes "4 days in May" never the specific date 12-16 May
+ - Location: Ana said to give a suggestion of location in Italy, but the model stores the
+            specifically location "In Italy"
+
+2. Look at dates in the final brief. Is it precise enough to book a flight?
+ Who should decide what “complete” means: the model or your code?
+ - No, "4 days in May" is not enough for booking a flight. The decision of complete
+ should the code decide not the model.
+
+
+3. Stretch: make missing_required() stricter (for example, dates must contain a day number)
+and add pace and avoid to the required fields. How many more questions does it take?
+ -3 more questions.(about date precisely, about the pace, and what things they want to avoid)/qi

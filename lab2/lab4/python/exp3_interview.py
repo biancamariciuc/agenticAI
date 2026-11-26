@@ -4,6 +4,7 @@
     python exp3_interview.py --vague      # step A: what happens when nobody asks
     python exp3_interview.py --simulate   # a simulated traveler with a hidden profile answers
 """
+import re
 import sys
 from typing import Literal
 
@@ -31,18 +32,32 @@ class InterviewTurn(BaseModel):
     next_question: str = Field(description="ONE short question about the most important unknown, or '' when done")
 
 
-REQUIRED = ["origin", "destination", "dates", "travelers", "budget_eur", "interests"]
+REQUIRED = ["origin", "destination", "dates", "travelers", "budget_eur", "interests", "pace", "avoid"]
 
 # TODO: write the interviewer's system prompt. It must NOT plan, must NOT guess or invent defaults,
 # must fill the brief only with what the traveler said, and must ask ONE question at a time
 # about the most important unknown (empty next_question when nothing is missing).
-INTERVIEWER = "TODO"
+INTERVIEWER = (
+    "You are a travel interviewer. Your only job is to collect the traveler's requirements. "
+    "Do NOT plan the trip, do NOT suggest destinations, and do NOT guess or invent any default values. "
+    "Each turn, look at what is still unknown and ask exactly one short, specific question about the "
+    "single most important missing field. The required fields are: origin, destination, dates, travelers, "
+    "budget_eur, interests. If the traveler wants you to suggest a destination, record destination as 'open'. "
+    "When every required field is filled, set next_question to an empty string."
+)
 
 
 def missing_required(brief: TravelBrief) -> list[str]:
     """The harness decides when the brief is complete, not the model."""
-    # TODO: return the names in REQUIRED whose value in `brief` is still empty (None, "" or []).
-    return []
+    # Return the names in REQUIRED whose value in `brief` is still empty (None, "" or []).
+    missing = [name for name in REQUIRED if not getattr(brief, name)]
+    # Stricter: dates must look bookable, e.g. "12-16 May" (a day range), not "4 days in May".
+    if "dates" not in missing and brief.dates is not None:
+        has_range = re.search(r"\d{1,2}\s*[-–to]+\s*\d{1,2}", brief.dates)
+        has_day_and_month = re.search(r"\d{1,2}\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)", brief.dates, re.I)
+        if not (has_range or has_day_and_month):
+            missing.append("dates")
+    return missing
 
 
 # --- A simulated traveler for hands-free testing ---------------------------
@@ -67,10 +82,11 @@ def interview(first_message: str, answer_fn) -> tuple[TravelBrief, int]:
                                   system=INTERVIEWER, schema=InterviewTurn).parsed
         brief = turn.brief
         missing = missing_required(brief)
-        # TODO: stop (return brief, asked) when the HARNESS says the brief is complete (`missing` is
-        # empty), whatever the model put in next_question. If the model returns an empty question
-        # while something is still missing, ask about missing[0] yourself.
-        question = turn.next_question
+        # Stop when the HARNESS says the brief is complete, whatever the model put in next_question.
+        if not missing:
+            return brief, asked
+        # If the model returns an empty question while something is still missing, ask about missing[0].
+        question = turn.next_question or f"Could you tell me your {missing[0]}?"
         print(f"\n[Planner] {question}")
         reply = answer_fn(transcript, question)
         print(f"[Traveler] {reply}")

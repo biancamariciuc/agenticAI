@@ -1,0 +1,33 @@
+Prompt         Correct (out of 5)       Output tokens
+
+answer only        0                         ~10
+my prompt          5                         ~476
+bonus 2            5                         ~42-210
+
+
+
+== short: 0/5 correct, 10 output tokens on average
+   ('yes', 138.0)             9 tok   last line: Answer: yes, EUR 138
+   ('yes', 138.0)             9 tok   last line: Answer: yes, EUR 138
+   ('yes', 163.0)             9 tok   last line: Answer: yes, EUR 163
+   ('yes', 131.5)            12 tok   last line: Answer: yes, EUR 131.50
+   ('yes', 160.0)             9 tok   last line: Answer: yes, EUR 160
+   vote: ('yes', 138.0) wins with 2/5   (all votes: {('yes', 138.0): 2, ('yes', 163.0): 1, ('yes', 131.5): 1, ('yes', 160.0): 1})
+
+== better: 5/5 correct, 476 output tokens on average
+   ('yes', 34.0)            453 tok   last line: Answer: yes, 34
+   ('yes', 34.0)            470 tok   last line: Answer: yes, 34
+   ('yes', 34.0)            510 tok   last line: Answer: yes, EUR 34
+   ('yes', 34.0)            445 tok   last line: Answer: yes, 34 EUR
+   ('yes', 34.0)            504 tok   last line: Answer: yes, 34
+   vote: ('yes', 34.0) wins with 5/5   (all votes: {('yes', 34.0): 5})
+
+
+== bonus 2
+
+      42 tok   total = 966.0   -> ('yes', 34.0)
+     174 tok   total = 966.0   -> ('yes', 34.0)
+     210 tok   total = 966.0   -> ('yes', 34.0)
+     209 tok   total = 966.0   -> ('yes', 34.0)
+     189 tok   total = 966.0   -> ('yes', 34.0)
+== code computes: 5/5 correct

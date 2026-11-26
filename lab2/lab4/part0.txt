@@ -1,0 +1,38 @@
+1	What must the agent know before it can plan anything? For each item: does it come from the traveller, from the world (prices, opening hours, weather), or from a calculation?
+
+->from the client: departure location, destination, time period, number of people, budget,preferred activities, daily pace, and dealbreakers/things to avoid.
+->from the world (liveweb APIs) : live transport, hotel prices, venue opening/closing hours, transit times between spots, and weather forecasts.
+->numbers related: Number of nights, remaining budget after fixed costs (flights/stays), daily spending caps, and total travel buffer times.
+
+
+2	What are the actual tasks, in order? Which ones depend on another task’s result, and which are independent?
+
+#idee
+Extract & clarify constraints (Independent — starts with user prompt).
+Fetch transport & accommodation options (Depends on #1: dates, destination, group).
+Fetch local attractions, hours & weather (Independent of #2, runs in parallel; depends on #1).
+Filter by budget & dealbreakers (Depends on #2 & #3 prices/rules).
+Build day-by-day schedule & route (Depends on #3 opening hours/locations & #4 filtered list).
+Verify total cost & timing math (Depends on #5).
+
+
+3	Which outputs must be exactly right? How could your code check them without asking the model?
+-> total price  <=budget
+->opening hours ( for hotels, activities , etc)
+-> no overlapping time
+4	Where can you trust what the model already knows, and where not?
+Trust: Understanding messy human intent, matching vibes/activities to the user's pace,, and writing friendly summaries.
+Do NOT trust: Live prices, current opening hours, exact transit durations, ticket availability, or arithmetic/budget totals,grouping nearby attractions logically
+
+5	Where must a human decide or approve?
+
+reserving the hotel
+reserving the plane ticket
+no actual appointment without approving
+no final decisions without approving
+bookings, payment
+
+
+6	What do you think one complete plan costs, in model calls and seconds?
+2–3 calls for the conversational intake/clarification turns
+1-2 calls for generating search queries for transport, accommodation, and
